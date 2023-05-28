@@ -1,61 +1,36 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import requester from "../../api/requester";
+import { login, logout, register } from "./auth.thunk";
+import { notification } from "antd";
 
 const initialState = {
   me: null,
   isLoading: false,
   error: null,
 };
-const login = createAsyncThunk(
-  "auth/login",
-  async (login, password, thunkAPI) => {
-    try {
-      const user = await requester.post("/auth/login", {
-        login,
-        password,
-      });
-      return user;
-    } catch (err) {
-      return err;
-    }
-  }
-);
 
-const register = createAsyncThunk(
-  "auth/register",
-  async (login, password, repeatPassword, thunkAPI) => {
-    try {
-      const res = await requester.post("/auth/register", {
-        login,
-        password,
-        repeatPassword,
-      });
-      return res;
-    } catch (err) {
-      return err;
-    }
-  }
-);
-
-const logout = createAsyncThunk("auth/logout", async (thunkAPI) => {
-  try {
-    await requester.post("/auth/logout");
-    if (window) {
-      window.location.reload();
-    }
-    return true;
-  } catch (err) {
-    return err;
-  }
-});
 export const authSlice = createSlice({
   name: "authStore",
   initialState,
-  reducers: {},
+  reducers: {
+    setMe: (state, action) => {
+      state.me = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(login.fulfilled, (state, action) => {
-      state.me = action.payload;
-      state.isLoading = false;
+      notification.destroy();
+      if (action.payload.error_code) {
+        notification.error({
+          message: action.payload.message,
+        });
+      } else {
+        state.me = action.payload.userInfo;
+        state.isLoading = false;
+        notification.success({
+          message: "Login success",
+        });
+      }
     });
     builder.addCase(login.rejected, (state, action) => {
       state.me = null;
@@ -76,8 +51,8 @@ export const authSlice = createSlice({
   },
 });
 
-const {} = authSlice.actions;
+const { setMe } = authSlice.actions;
 
 const authReducer = authSlice.reducer;
 
-export { authReducer };
+export { authReducer, setMe };

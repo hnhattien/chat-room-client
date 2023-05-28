@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import requester from "../api/requester";
 import { notification } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { setMe } from "../store/auth/auth.slice";
 
 const useLogin = () => {
   const [user, setUser] = useState(null);
@@ -31,16 +33,22 @@ const useLogout = () => {
   return [logout];
 };
 const useMe = () => {
-  const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
+  const me = useSelector((state) => state.authStore.me);
+  const dispatch = useDispatch();
   const getMe = async () => {
     try {
       const user = await requester.getSync("/auth/me");
-      setUser(user);
+      dispatch(setMe(user));
     } catch (err) {
       setError(err);
     }
   };
+  useEffect(() => {
+    if (!me) {
+      getMe();
+    }
+  }, []);
   useEffect(() => {
     if (error) {
       notification.destroy();
@@ -49,7 +57,7 @@ const useMe = () => {
       });
     }
   }, [error]);
-  return [user, getMe];
+  return [me, getMe];
 };
 
 const useRegister = () => {

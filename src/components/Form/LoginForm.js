@@ -1,27 +1,18 @@
 import { Button, Form, Input, notification } from "antd";
 import React from "react";
 import { useLogin } from "../../hooks/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../../store/auth/auth.thunk";
 
-export default function LoginForm({ login, user, error }) {
+export default function LoginForm() {
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
+  const authStore = useSelector((state) => state.authStore);
   const onLogin = (values) => {
     console.log(values);
-    login(...Object.values(values));
+    dispatch(login(values));
   };
-  console.log(error);
-  if (error) {
-    console.log("Show");
-    notification.destroy();
-    notification.error({
-      message: error.message,
-    });
-  }
-  if (user) {
-    notification.destroy();
-    notification.success({
-      message: "Login success",
-    });
-  }
+
   return (
     <Form
       labelCol={{ span: 8 }}

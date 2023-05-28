@@ -1,28 +1,18 @@
 import { Button, Form, Input, notification } from "antd";
 import React from "react";
 import { useRegister } from "../../hooks/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../../store/auth/auth.thunk";
 
 export default function RegisterForm({ setSelectedForm }) {
-  const [res, error, register] = useRegister();
   const [form] = Form.useForm();
+  const dispatch = useDispatch();
+  const authStore = useSelector((state) => state.authStore);
   const onRegister = (values) => {
     console.log(values);
-    register(...Object.values(values));
-  };
-  if (error) {
-    console.log(error);
-    notification.destroy();
-    notification.error({
-      message: error.message,
-    });
-  }
-  if (res) {
-    notification.destroy();
-    notification.success({
-      message: res.message,
-    });
+    dispatch(register(values));
     setSelectedForm("login");
-  }
+  };
   return (
     <Form
       labelCol={{ span: 8 }}

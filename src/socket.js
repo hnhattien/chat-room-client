@@ -5,7 +5,7 @@ const chatSocket = io(`${URL}/chat`, {
   autoConnect: false,
 });
 const videoSocket = io(`${URL}/video`, {
-    autoConnect: false
-})
+  autoConnect: false,
+});
 
 export { chatSocket, videoSocket };

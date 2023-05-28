@@ -10,19 +10,34 @@ import {
 import React, { useEffect, useState } from "react";
 import requester from "../../api/requester";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { useDispatch } from "react-redux";
-import { createRoom } from "../../store/chat/chat.slice";
+import { useDispatch, useSelector } from "react-redux";
 import { split, trim } from "lodash";
-export default function CreateRoomForm() {
+import { createRoom } from "../../store/chat/chat.thunk";
+import { useNavigate } from "react-router-dom";
+export default function CreateRoomForm({ onClose }) {
   const [form] = Form.useForm();
   const [userNames, setUserNames] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [imgBase64, setImgBase64] = useState(null);
+  const chatStore = useSelector((state) => state.chatStore);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const onCreateRoom = () => {
     const users = split(trim(form.getFieldValue("usernamesMention")), /@/g);
     form.setFieldValue("usernames", users);
     dispatch(createRoom(form.getFieldsValue()));
+    if (chatStore.error) {
+      notification.error({
+        message: chatStore.error.message,
+      });
+    } else {
+      notification.success({
+        message: "Create room success",
+      });
+      navigate(0);
+    }
   };
+
   const [isLoading, setIsLoading] = useState(false);
   const getBase64 = (img, callback) => {
     console.log(form.getFieldsValue());
@@ -37,6 +52,7 @@ export default function CreateRoomForm() {
     getBase64(info.file.originFileObj, (url) => {
       setLoading(false);
       console.log(url);
+      setImgBase64(url);
       form.setFieldValue("avatar", url);
       console.log(form.getFieldsValue());
     });
@@ -127,12 +143,8 @@ export default function CreateRoomForm() {
             console.log(file, "Hi");
           }}
         >
-          {form.getFieldValue("avatar") ? (
-            <img
-              src={form.getFieldValue("avatar")}
-              alt="avatar"
-              style={{ width: "100%" }}
-            />
+          {imgBase64 ? (
+            <img src={imgBase64} alt="avatar" style={{ width: "100%" }} />
           ) : (
             uploadButton
           )}

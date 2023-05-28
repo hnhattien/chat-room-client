@@ -1,65 +1,53 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { chatSocket } from "../../socket";
 import requester from "../../api/requester";
-import { isArray } from "lodash";
+import { find, isArray } from "lodash";
+import {
+  createRoom,
+  getMessagesByRoomId,
+  getRoomByUserId,
+  joinRoom,
+  sendMessageToRoom,
+} from "./chat.thunk";
+import { notification } from "antd";
 
 const initialState = {
   rooms: [],
   messages: [],
   isLoading: false,
-  currentRoomId: null,
   error: null,
+  socketId: null,
 };
-const createRoom = createAsyncThunk("room/create", async (room, thunkAPI) => {
-  try {
-    const res = await requester.post("/room", room);
-    return res;
-  } catch (err) {
-    return err;
-  }
-});
-const getRoomsByQuery = createAsyncThunk(
-  "room/getRoomByQuery",
-  async (query, thunkAPI) => {
-    try {
-      const res = await requester.getSync("/room", query);
-      return res;
-    } catch (err) {
-      return err;
-    }
-  }
-);
-const joinRoom = createAsyncThunk("room/join", async (roomId, thunkAPI) => {
-  try {
-    const res = await requester.post("/chat/room", roomId);
-    return res;
-  } catch (err) {
-    return err;
-  }
-});
+
 export const chatSlice = createSlice({
   name: "chatStore",
   initialState,
   reducers: {
-    sendMessageToRoom: (state, action) => {
-      if (state.currentRoomId) {
+    addMessage: (state, action) => {
+      if (action.payload) {
+        state.messages.push(action.payload);
       }
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(getMessagesByRoomId.fulfilled, (state, action) => {
+      state.messages = action.payload;
+    });
     builder.addCase(createRoom.fulfilled, (state, action) => {
       state.rooms.push(action.payload);
       state.isLoading = false;
+      state.error = null;
     });
     builder.addCase(createRoom.rejected, (state, action) => {
       state.error = action.payload;
       state.isLoading = false;
+      state.error = action.payload;
     });
     builder.addCase(createRoom.pending, (state, action) => {
       state.isLoading = true;
     });
 
-    builder.addCase(getRoomsByQuery.fulfilled, (state, action) => {
+    builder.addCase(getRoomByUserId.fulfilled, (state, action) => {
       if (isArray(action.payload)) {
         state.rooms = action.payload;
       }
@@ -67,14 +55,27 @@ export const chatSlice = createSlice({
 
       state.isLoading = false;
     });
-    builder.addCase(getRoomsByQuery.pending, (state, action) => {
+    builder.addCase(getRoomByUserId.pending, (state, action) => {
       state.isLoading = true;
+    });
+    builder.addCase(sendMessageToRoom.fulfilled, (state, action) => {
+      state.isLoading = false;
+    });
+
+    builder.addCase(joinRoom.fulfilled, (state, action) => {
+      state.rooms.push(action.payload);
+    });
+
+    builder.addCase(joinRoom.rejected, (state, action) => {
+      state.notification.error({
+        message: action.payload.message,
+      });
     });
   },
 });
 
-const { sendMessageToRoom } = chatSlice.actions;
+const { addMessage } = chatSlice.actions;
 
 const chatReducer = chatSlice.reducer;
 
-export { chatReducer, sendMessageToRoom, createRoom, getRoomsByQuery };
+export { chatReducer, addMessage };

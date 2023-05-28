@@ -1,10 +1,10 @@
 import React from "react";
-import ChatContent from "../ChatContent";
-import ChatInput from "../ChatInput";
+import ChatContent from "../Chat/ChatContent";
+import ChatInput from "../Chat/ChatInput";
 
 export default function MainContent({ children }) {
   return (
-    <div style={{ flexGrow: 3 }} className="main-content">
+    <div style={{ width: "100%" }} className="main-content">
       {children}
     </div>
   );

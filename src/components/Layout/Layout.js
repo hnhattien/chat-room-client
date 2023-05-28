@@ -3,7 +3,7 @@ import React from "react";
 export default function Layout({ children }) {
   return (
     <div
-      style={{ display: "flex", paddingLeft: "2rem", flexDirection: "column" }}
+      style={{ display: "flex", flexDirection: "column" }}
       className="wrapper"
     >
       {children}
