@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { getRoomByUserId } from "../../store/chat/chat.thunk";
 import { useMe } from "../../hooks/auth";
 
-export default function Rooms() {
+export default function UserRooms() {
   const rooms = useSelector((state) => state.chatStore.rooms);
   const dispatch = useDispatch();
   const [me] = useMe();

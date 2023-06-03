@@ -31,11 +31,18 @@ export default function RoomChatPage({ isConnected }) {
         roomId: id,
         message,
       });
+      chatSocket.on("received message room", (data) => {
+        const { sender, roomId, message } = data || {};
+        dispatch(addMessage({ userId: sender, roomId: roomId, text: message }));
+      });
       if (callback) {
         callback();
       }
     }
   };
+  useEffect(() => {
+    chatSocket.on("messa");
+  }, []);
   useEffect(() => {
     dispatch(getMessagesByRoomId(id));
   }, [id]);

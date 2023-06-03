@@ -3,7 +3,7 @@ import "./App.css";
 import Layout from "./components/Layout/Layout";
 import MainContent from "./components/MainContent/MainContent";
 import SideBar from "./components/SideBar/SideBar";
-import Rooms from "./components/Chat/Rooms";
+import UserRooms from "./components/Chat/UserRooms";
 import ChatContent from "./components/Chat/ChatContent";
 import ChatInput from "./components/Chat/ChatInput";
 import React, { useEffect, useState } from "react";
@@ -44,7 +44,7 @@ function App() {
       <Header></Header>
       <HomeContainer>
         <SideBar>
-          <Rooms></Rooms>
+          <UserRooms></UserRooms>
         </SideBar>
         <MainContent>
           <Routes>

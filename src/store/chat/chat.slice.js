@@ -1,12 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { chatSocket } from "../../socket";
 import requester from "../../api/requester";
-import { find, isArray } from "lodash";
+import { find, isArray, pull, pullAllBy, pullAllWith, remove } from "lodash";
 import {
   createRoom,
   getMessagesByRoomId,
   getRoomByUserId,
   joinRoom,
+  leaveRoom,
   sendMessageToRoom,
 } from "./chat.thunk";
 import { notification } from "antd";
@@ -63,13 +64,26 @@ export const chatSlice = createSlice({
     });
 
     builder.addCase(joinRoom.fulfilled, (state, action) => {
-      state.rooms.push(action.payload);
+      if (action.payload.error_code) {
+        state.notification.error({
+          message: action.payload.message,
+        });
+      } else {
+        state.rooms.push(action.payload);
+      }
     });
 
-    builder.addCase(joinRoom.rejected, (state, action) => {
-      state.notification.error({
-        message: action.payload.message,
-      });
+    builder.addCase(joinRoom.rejected, (state, action) => {});
+    builder.addCase(leaveRoom.fulfilled, (state, action) => {
+      if (action.payload.error_code) {
+        notification.error({
+          message: action.payload.message,
+        });
+      } else {
+        state.rooms = state.rooms.filter(
+          (room) => room.id !== action.payload.id
+        );
+      }
     });
   },
 });

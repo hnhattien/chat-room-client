@@ -1,5 +1,5 @@
 import { Button, Modal, Radio, notification } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLogout, useMe } from "../../hooks/auth";
 import { upperCase } from "lodash";
@@ -8,7 +8,8 @@ import LoginForm from "../Form/LoginForm";
 import RegisterForm from "../Form/RegisterForm";
 import Search from "antd/es/input/Search";
 import requester from "../../api/requester";
-import RoomList from "../Chat/RoomList";
+import RoomList from "./FindRoom/RoomItem";
+import FindRoomForm from "../Form/FindRoomForm";
 
 export default function Header() {
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
@@ -16,13 +17,13 @@ export default function Header() {
   const [isOpenFindRoomModal, setIsOpenFindRoomModal] = useState(false);
   const [selectedForm, setSelectedForm] = useState("login");
   const [me, getMe] = useMe();
-  const [isLoading, setIsLoading] = useState(false);
   const [logout] = useLogout();
-  const [rooms, setRooms] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
   const onShowLoginModal = () => {
     setIsOpenLoginModal(true);
   };
+  useEffect(() => {
+    setIsOpenLoginModal(false);
+  }, [me]);
   const onCloseCreateRoomModal = () => {
     setIsOpenCreateRoomModal(false);
   };
@@ -39,23 +40,7 @@ export default function Header() {
   const onShowFindRoomModal = () => {
     setIsOpenFindRoomModal(true);
   };
-  const onFindRooms = async (value) => {
-    try {
-      setIsLoading(true);
-      const data = await requester.getSync("/search-room", {
-        q: searchValue,
-      });
-      setRooms(data);
-    } catch (err) {
-      notification.error({
-        message: err.message,
-      });
-    }
-    setIsLoading(false);
-  };
-  const onSearchInputChange = (ev) => {
-    setSearchValue(ev.target.value);
-  };
+
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900 shadow-slate-400 border-gray-200">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between p-4">
@@ -123,14 +108,7 @@ export default function Header() {
         open={isOpenFindRoomModal}
         title={upperCase("Find room")}
       >
-        <Search
-          placeholder="input search loading with enterButton"
-          loading={isLoading}
-          enterButton
-          onChange={onSearchInputChange}
-          onSearch={onFindRooms}
-        />
-        <RoomList rooms={rooms}></RoomList>
+        <FindRoomForm></FindRoomForm>
       </Modal>
     </nav>
   );

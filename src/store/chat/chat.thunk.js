@@ -62,6 +62,22 @@ const joinRoom = createAsyncThunk(
         roomId,
         userId,
       });
+      return res;
+    } catch (err) {
+      return err;
+    }
+  }
+);
+
+const leaveRoom = createAsyncThunk(
+  "room/leaveRoom",
+  async (payload, thunkAPI) => {
+    try {
+      const { roomId, userId } = pick(payload, ["roomId", "userId"]);
+      const res = await requester.post(`/room/leave`, {
+        roomId,
+        userId,
+      });
       console.log(res);
       return res;
     } catch (err) {
@@ -76,4 +92,5 @@ export {
   joinRoom,
   sendMessageToRoom,
   getMessagesByRoomId,
+  leaveRoom,
 };
