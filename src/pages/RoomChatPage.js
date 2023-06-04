@@ -14,6 +14,7 @@ import Messages from "../components/Chat/Messages";
 import { useMe } from "../hooks/auth";
 import { useCurrentRoom } from "../hooks/chat";
 import ChatHeader from "../components/Chat/ChatHeader";
+import socketConstant from "../constant/socketConstant";
 
 export default function RoomChatPage({ isConnected }) {
   const { id } = useParams();
@@ -26,14 +27,10 @@ export default function RoomChatPage({ isConnected }) {
     if (me) {
       dispatch(sendMessageToRoom({ userId: me.id, roomId: id, message }));
       dispatch(addMessage({ userId: me.id, roomId: id, text: message }));
-      chatSocket.emit("new message room", {
+      chatSocket.emit(socketConstant.SEND_NEW_ROOM_MESSAGE, {
         sender: me.id,
         roomId: id,
         message,
-      });
-      chatSocket.on("received message room", (data) => {
-        const { sender, roomId, message } = data || {};
-        dispatch(addMessage({ userId: sender, roomId: roomId, text: message }));
       });
       if (callback) {
         callback();
@@ -41,7 +38,17 @@ export default function RoomChatPage({ isConnected }) {
     }
   };
   useEffect(() => {
-    chatSocket.on("messa");
+    chatSocket.emit(
+      socketConstant.JOIN_CHAT_ROOM,
+      { roomId: id },
+      ({ message }) => {
+        alert(message);
+      }
+    );
+    chatSocket.on(socketConstant.RECEIVE_NEW_ROOM_MESSAGE, (data) => {
+      const { sender, roomId, message } = data || {};
+      dispatch(addMessage({ userId: sender, roomId: roomId, text: message }));
+    });
   }, []);
   useEffect(() => {
     dispatch(getMessagesByRoomId(id));

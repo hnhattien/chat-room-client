@@ -33,30 +33,19 @@ const useLogout = () => {
   return [logout];
 };
 const useMe = () => {
-  const [error, setError] = useState(null);
   const me = useSelector((state) => state.authStore.me);
   const dispatch = useDispatch();
   const getMe = async () => {
     try {
       const user = await requester.getSync("/auth/me");
       dispatch(setMe(user));
-    } catch (err) {
-      setError(err);
-    }
+    } catch (err) {}
   };
   useEffect(() => {
     if (!me) {
       getMe();
     }
   }, []);
-  useEffect(() => {
-    if (error) {
-      notification.destroy();
-      notification.info({
-        message: "You have not been logined yet",
-      });
-    }
-  }, [error]);
   return [me, getMe];
 };
 
